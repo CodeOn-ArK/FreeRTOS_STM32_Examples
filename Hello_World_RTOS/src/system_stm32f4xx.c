@@ -315,6 +315,7 @@
   */
 
 #include "stm32f4xx.h"
+#include "stm32f4xx_hal_conf.h"
 
 /**
   * @}
@@ -438,7 +439,7 @@
 #endif /* STM32F40_41xxx */
 
 #if defined(STM32F427_437xx) || defined(STM32F429_439xx) || defined(STM32F446xx) || defined(STM32F469_479xx)
-  uint32_t SystemCoreClock = 180000000;
+  uint32_t SystemCoreClock = 16000000; //180000000;
 #endif /* STM32F427_437x || STM32F429_439xx || STM32F446xx || STM32F469_479xx */
 
 #if defined(STM32F401xx)
@@ -449,8 +450,7 @@
   uint32_t SystemCoreClock = 100000000;
 #endif /* STM32F410xx || STM32F401xE || STM32F412xG || STM32F413_423xx */
 
-__I uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
-
+const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
 /**
   * @}
   */
