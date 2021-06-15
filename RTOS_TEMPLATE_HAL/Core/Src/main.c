@@ -22,9 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-void SystemClock_Config(void);
-static void task1_handler(void *parameter);
-static void task2_handler(void *parameter);
+#include<stdarg.h>
 
 /* USER CODE END Includes */
 
@@ -53,6 +51,24 @@ UART_HandleTypeDef huart2;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
+
+void SystemClock_Config(void);
+static void task1_handler(void *parameter);
+static void task2_handler(void *parameter);
+void printmsg(const char *format,...);
+
+void printmsg(const char *format,...)
+{
+       char str[80];
+
+        /*extract the arg list using va apis */
+       va_list args;
+       va_start(args, format);
+       vsprintf(str, format, args);
+
+       HAL_UART_Transmit(&huart2, (uint8_t *)str, strlen(str), HAL_MAX_DELAY);
+       va_end(args);
+}
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -66,8 +82,6 @@ static void MX_USART2_UART_Init(void);
   * @brief  The application entry point.
   * @retval int
   */
-TaskHandle_t task1_handle = NULL,
-		 	 task2_handle = NULL;
 
 int main(void)
 {
@@ -95,21 +109,6 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
-  BaseType_t status;
-
-	//printf("The application has started\n\r");
-
-	status = xTaskCreate(task1_handler, "TASK 1", configMINIMAL_STACK_SIZE, "TASK 1\r", 2, &task1_handle);
-	configASSERT(status == pdPASS);
-
-	status = xTaskCreate(task2_handler, "TASK 2", configMINIMAL_STACK_SIZE, "TASK 2\r", 2, &task2_handle);
-	configASSERT(status == pdPASS);
-
-	//start FreeRTOS scheduler
-	vTaskStartScheduler();
-
-	//if the control comes here, the cpu comes here due to unsufficient task in the memory
 
   /* USER CODE END 2 */
 
@@ -230,23 +229,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-static void task1_handler(void *parameter)
-{
-
-	while(1){
-		printf("%s\n", (char *)parameter);
-		taskYIELD();
-	}
-}
-static void task2_handler(void *parameter)
-{
-
-	while(1){
-		printf("%s\n", (char *)parameter);
-		taskYIELD();
-	}
-}
-
 
 /* USER CODE END 4 */
 
