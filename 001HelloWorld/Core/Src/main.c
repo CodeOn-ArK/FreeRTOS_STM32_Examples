@@ -250,8 +250,8 @@ static void task1_handler(void *parameter)
 {
 
 	while(1){
-		//printmsg((const char *)parameter);
-		printf((char *)parameter);
+		printmsg((const char *)parameter);
+		//printf((char *)parameter);
 		taskYIELD();
 	}
 }
@@ -259,8 +259,8 @@ static void task2_handler(void *parameter)
 {
 
 	while(1){
-		//printmsg((const char *)parameter );
-		printf((char *)parameter);
+		printmsg((const char *)parameter );
+		//printf((char *)parameter);
 		taskYIELD();
 	}
 }
