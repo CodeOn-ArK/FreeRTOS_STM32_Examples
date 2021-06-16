@@ -76,12 +76,14 @@ void printmsg(const char *format,...)
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-/* USER CODE END 0 */
+/* USER CODE END 0 *///0x200132ac   0x1fff
 
 /**
   * @brief  The application entry point.
   * @retval int
   */
+TaskHandle_t task1_handle = NULL,
+		 	 task2_handle = NULL;
 
 int main(void)
 {
@@ -91,6 +93,7 @@ int main(void)
 
   /* MCU Configuration--------------------------------------------------------*/
 
+  DWT->CTRL |= (0x1 << 0);
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
@@ -109,6 +112,24 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  BaseType_t status;
+
+	//printf("The application has started\n\r");
+
+  //Start Recording
+  SEGGER_SYSVIEW_Conf();
+  SEGGER_SYSVIEW_Start();
+
+	status = xTaskCreate(task1_handler, "TASK 1", configMINIMAL_STACK_SIZE, "Hello world from TASK 1\n\r", 2, &task1_handle);
+	configASSERT(status == pdPASS);
+
+	status = xTaskCreate(task2_handler, "TASK 2", configMINIMAL_STACK_SIZE, "Hello world how are you from TASK 2\n\r", 2, &task2_handle);
+	configASSERT(status == pdPASS);
+
+	//start FreeRTOS scheduler
+	vTaskStartScheduler();
+
+	//if the control comes here, the cpu comes here due to unsufficient task in the memory
 
   /* USER CODE END 2 */
 
@@ -229,6 +250,22 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void task1_handler(void *parameter)
+{
+
+	while(1){
+		printf("%s\n", (char *)parameter);
+		taskYIELD();
+	}
+}
+static void task2_handler(void *parameter)
+{
+
+	while(1){
+		printf("%s\n", (char *)parameter);
+		taskYIELD();
+	}
+}
 
 /* USER CODE END 4 */
 

@@ -1,9 +1,9 @@
 /*********************************************************************
-*                    SEGGER Microcontroller GmbH                     *
+*                SEGGER Microcontroller GmbH & Co. KG                *
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*            (c) 1995 - 2021 SEGGER Microcontroller GmbH             *
+*       (c) 2015 - 2017  SEGGER Microcontroller GmbH & Co. KG        *
 *                                                                    *
 *       www.segger.com     Support: support@segger.com               *
 *                                                                    *
@@ -17,14 +17,24 @@
 *                                                                    *
 * SEGGER strongly recommends to not make any changes                 *
 * to or modify the source code of this software in order to stay     *
-* compatible with the SystemView and RTT protocol, and J-Link.       *
+* compatible with the RTT protocol and J-Link.                       *
 *                                                                    *
 * Redistribution and use in source and binary forms, with or         *
 * without modification, are permitted provided that the following    *
-* condition is met:                                                  *
+* conditions are met:                                                *
 *                                                                    *
 * o Redistributions of source code must retain the above copyright   *
-*   notice, this condition and the following disclaimer.             *
+*   notice, this list of conditions and the following disclaimer.    *
+*                                                                    *
+* o Redistributions in binary form must reproduce the above          *
+*   copyright notice, this list of conditions and the following      *
+*   disclaimer in the documentation and/or other materials provided  *
+*   with the distribution.                                           *
+*                                                                    *
+* o Neither the name of SEGGER Microcontroller GmbH & Co. KG         *
+*   nor the names of its contributors may be used to endorse or      *
+*   promote products derived from this software without specific     *
+*   prior written permission.                                        *
 *                                                                    *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND             *
 * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,        *
@@ -42,13 +52,13 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       SystemView version: 3.30                                    *
+*       SystemView version: V2.52d                                    *
 *                                                                    *
 **********************************************************************
 -------------------------- END-OF-HEADER -----------------------------
 File    : SEGGER_SYSVIEW.h
 Purpose : System visualization API.
-Revision: $Rev: 21292 $
+Revision: $Rev: 12706 $
 */
 
 #ifndef SEGGER_SYSVIEW_H
@@ -62,7 +72,6 @@ Revision: $Rev: 21292 $
 */
 
 #include "SEGGER.h"
-#include "SEGGER_SYSVIEW_ConfDefaults.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,10 +85,7 @@ extern "C" {
 **********************************************************************
 */
 
-#define SEGGER_SYSVIEW_MAJOR          3
-#define SEGGER_SYSVIEW_MINOR          10
-#define SEGGER_SYSVIEW_REV            0
-#define SEGGER_SYSVIEW_VERSION        ((SEGGER_SYSVIEW_MAJOR * 10000) + (SEGGER_SYSVIEW_MINOR * 100) + SEGGER_SYSVIEW_REV)
+#define SEGGER_SYSVIEW_VERSION        21000
 
 #define SEGGER_SYSVIEW_INFO_SIZE      9   // Minimum size, which has to be reserved for a packet. 1-2 byte of message type, 0-2  byte of payload length, 1-5 bytes of timestamp.
 #define SEGGER_SYSVIEW_QUANTA_U32     5   // Maximum number of bytes to encode a U32, should be reserved for each 32-bit value in a packet.
@@ -108,8 +114,8 @@ extern "C" {
 #define   SYSVIEW_EVTID_SYSTIME_CYCLES    12
 #define   SYSVIEW_EVTID_SYSTIME_US        13
 #define   SYSVIEW_EVTID_SYSDESC           14
-#define   SYSVIEW_EVTID_MARK_START        15
-#define   SYSVIEW_EVTID_MARK_STOP         16
+#define   SYSVIEW_EVTID_USER_START        15
+#define   SYSVIEW_EVTID_USER_STOP         16
 #define   SYSVIEW_EVTID_IDLE              17
 #define   SYSVIEW_EVTID_ISR_TO_SCHEDULER  18
 #define   SYSVIEW_EVTID_TIMER_ENTER       19
@@ -125,11 +131,6 @@ extern "C" {
 #define   SYSVIEW_EVTID_TASK_TERMINATE    29
 
 #define   SYSVIEW_EVTID_EX                31
-//
-// SystemView extended events. Sent with ID 31.
-//
-#define   SYSVIEW_EVTID_EX_MARK            0
-#define   SYSVIEW_EVTID_EX_NAME_MARKER     1
 //
 // Event masks to disable/enable events
 //
@@ -205,29 +206,6 @@ struct SEGGER_SYSVIEW_MODULE_STRUCT {
 
 typedef void (SEGGER_SYSVIEW_SEND_SYS_DESC_FUNC)(void);
 
-
-/*********************************************************************
-*
-*       Global data
-*
-**********************************************************************
-*/
-
-#ifdef   EXTERN
-  #undef EXTERN
-#endif
-
-#ifndef SEGGER_SYSVIEW_C       // Defined in SEGGER_SYSVIEW.c which includes this header beside other C-files
-  #define EXTERN extern
-#else
-  #define EXTERN
-#endif
-
-EXTERN unsigned int SEGGER_SYSVIEW_TickCnt;
-EXTERN unsigned int SEGGER_SYSVIEW_InterruptId;
-
-#undef EXTERN
-
 /*********************************************************************
 *
 *       API functions
@@ -253,7 +231,6 @@ void SEGGER_SYSVIEW_SendTaskList                  (void);
 void SEGGER_SYSVIEW_SendTaskInfo                  (const SEGGER_SYSVIEW_TASKINFO* pInfo);
 void SEGGER_SYSVIEW_SendSysDesc                   (const char* sSysDesc);
 int  SEGGER_SYSVIEW_IsStarted                     (void);
-int  SEGGER_SYSVIEW_GetChannelID                  (void);
 
 /*********************************************************************
 *
@@ -287,10 +264,8 @@ void SEGGER_SYSVIEW_OnTaskStartExec               (U32 TaskId);
 void SEGGER_SYSVIEW_OnTaskStopExec                (void);
 void SEGGER_SYSVIEW_OnTaskStartReady              (U32 TaskId);
 void SEGGER_SYSVIEW_OnTaskStopReady               (U32 TaskId, unsigned int Cause);
-void SEGGER_SYSVIEW_MarkStart                     (unsigned int MarkerId);
-void SEGGER_SYSVIEW_MarkStop                      (unsigned int MarkerId);
-void SEGGER_SYSVIEW_Mark                          (unsigned int MarkerId);
-void SEGGER_SYSVIEW_NameMarker                    (unsigned int MarkerId, const char* sName);
+void SEGGER_SYSVIEW_OnUserStart                   (unsigned int UserId);       // Start of user defined event (such as a subroutine to profile)
+void SEGGER_SYSVIEW_OnUserStop                    (unsigned int UserId);       // Start of user defined event
 
 void SEGGER_SYSVIEW_NameResource                  (U32 ResourceId, const char* sName);
 
@@ -351,19 +326,9 @@ void SEGGER_SYSVIEW_Conf                          (void);
 U32  SEGGER_SYSVIEW_X_GetTimestamp                (void);
 U32  SEGGER_SYSVIEW_X_GetInterruptId              (void);
 
-void SEGGER_SYSVIEW_X_StartComm                   (void);
-void SEGGER_SYSVIEW_X_OnEventRecorded             (unsigned NumBytes);
-
 #ifdef __cplusplus
 }
 #endif
-
-/*********************************************************************
-*
-*       Compatibility API defines
-*/
-#define SEGGER_SYSVIEW_OnUserStart      SEGGER_SYSVIEW_MarkStart
-#define SEGGER_SYSVIEW_OnUserStop       SEGGER_SYSVIEW_MarkStop
 
 #endif
 
