@@ -120,10 +120,10 @@ int main(void)
   SEGGER_SYSVIEW_Conf();
   SEGGER_SYSVIEW_Start();
 
-	status = xTaskCreate(task1_handler, "TASK 1", configMINIMAL_STACK_SIZE, "Hello world from TASK 1\n\r", 2, &task1_handle);
+	status = xTaskCreate(task1_handler, "TASK 1", configMINIMAL_STACK_SIZE, "TASK 1\n\r", 2, &task1_handle);
 	configASSERT(status == pdPASS);
 
-	status = xTaskCreate(task2_handler, "TASK 2", configMINIMAL_STACK_SIZE, "Hello world how are you from TASK 2\n\r", 2, &task2_handle);
+	status = xTaskCreate(task2_handler, "TASK 2", configMINIMAL_STACK_SIZE, "Hello world from TASK 2\n\r", 2, &task2_handle);
 	configASSERT(status == pdPASS);
 
 	//start FreeRTOS scheduler
@@ -255,7 +255,7 @@ static void task1_handler(void *parameter)
 
 	while(1){
 		printf("%s\n", (char *)parameter);
-		taskYIELD();
+		//taskYIELD();
 	}
 }
 static void task2_handler(void *parameter)
@@ -263,7 +263,7 @@ static void task2_handler(void *parameter)
 
 	while(1){
 		printf("%s\n", (char *)parameter);
-		taskYIELD();
+		//taskYIELD();
 	}
 }
 
