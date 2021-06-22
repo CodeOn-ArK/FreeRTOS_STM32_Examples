@@ -254,7 +254,7 @@ static void led_task_handler(void *parameter)
 	while(1){
 		if(flag == 1)HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 		else HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-		taskYIELD();
+
 	}
 }
 static void btn_task_handler(void *parameter)
@@ -265,7 +265,7 @@ static void btn_task_handler(void *parameter)
 			flag = 1;
 		}
 		else flag = 0;
-		taskYIELD();
+
 	}
 }
 
