@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include<stdarg.h>
+#include <string.h>
 
 /* USER CODE END Includes */
 
@@ -154,6 +155,7 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
+#if USE180
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
@@ -196,7 +198,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-
+#endif //USE180
   SystemCoreClockUpdate();
 }
 
@@ -271,16 +273,18 @@ static void task1_handler(void *parameter)
 {
 
 	while(1){
-		printf("%s\n", (char *)parameter);
-		//taskYIELD();
+		HAL_UART_Transmit(&huart2, (uint8_t *)parameter, strlen((char *)parameter), HAL_MAX_DELAY);
+		//printf("%s\n", (char *)parameter);
+		taskYIELD();
 	}
 }
 static void task2_handler(void *parameter)
 {
 
 	while(1){
-		printf("%s\n", (char *)parameter);
-		//taskYIELD();
+		HAL_UART_Transmit(&huart2, (uint8_t *)parameter, strlen((char *)parameter), HAL_MAX_DELAY);
+		//printf("%s\n", (char *)parameter);
+		taskYIELD();
 	}
 }
 
