@@ -253,14 +253,15 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 static void task1_handler(void *parameter)
 {
+	uint32_t notif_count = 0;
 
 	while(1){
 		//First wait until we are notified by any other task about notification
-		if( xTaskNotifyWait(0, 0, NULL, portMAX_DELAY)  == pdTRUE)
+		if( xTaskNotifyWait(0, 0, &notif_count, portMAX_DELAY)  == pdTRUE)
 		{
 			//We have received notification lets turn on the LED
 			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-			printmsg("Notification received : Toggling LED\n\r ");
+			printmsg("Notification received : Toggling LED : %d\n\r", notif_count);
 		}
 	}
 }
@@ -274,7 +275,7 @@ static void task2_handler(void *parameter)
 			RTOS_delay(300);
 
 			//Button is pressed; Notify the LED Task
-			xTaskNotify(task1_handle, 0, eNoAction);
+			xTaskNotify(task1_handle, 0, eIncrement);
 		}
 	}
 }
