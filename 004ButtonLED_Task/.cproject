@@ -238,4 +238,5 @@
 			<resource resourceType="PROJECT" workspacePath="/RTOS_TEMPLATE_HAL"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>
