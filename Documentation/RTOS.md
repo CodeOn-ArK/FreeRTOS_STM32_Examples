@@ -12,4 +12,10 @@
 - In RTOS, thread executes in the order of priority. Higher Priority threads get more chance over lower priority counterparts. 
 - During thread execution if any higher priority thread becomes ready to run then it takes over the CPU and the lower priority thread gets paused.
 
+## FREE-RTOS Task Creation :
+
+- ```TASKS``` are computational unit that runs on a CPU under the control of a ```KERNEL```. Tasks run alternately on a CPU consuming resources in a synchronous way, and giving each activity enough time to complete its job.
+- To use a task we first need to create a task and then need to implement the task function.
+- Task creation creates mem region for the Task stack and TCB, and the task handler is the one which runs on the CPU.
+- 
    
