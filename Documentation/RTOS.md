@@ -17,5 +17,8 @@
 - ```TASKS``` are computational unit that runs on a CPU under the control of a ```KERNEL```. Tasks run alternately on a CPU consuming resources in a synchronous way, and giving each activity enough time to complete its job.
 - To use a task we first need to create a task and then need to implement the task function.
 - Task creation creates mem region for the Task stack and TCB, and the task handler is the one which runs on the CPU.
-- 
+- Variables within task handler are created locally in stack, of the respective Tasks. If the variable is static and multiple Tasks are using it, then it acts as a single shared resource between the two Tasks
+- A task handler has a infinite loop inside it which runs continously just like the infinte loop in main code.
+- In case the task implementation breaks the loop, the task must be deleted with APIs such as ```vTaskDelete(NULL)``` or else suffer chaos.
+-
    
