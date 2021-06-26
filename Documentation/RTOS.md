@@ -29,10 +29,28 @@
 - Since these are dynamically created they use up the heap memory. 
 - The ```RAM``` is divided up in 2 parts; One is Heap region the other is used to store global data, arrays, static data etc.
 - In Heap all the mem allocation for TCB and Task's stack is done.
+- The TCB is created in heap and initialized
 - The heap size can be configured using ```configTOTAL_HEAP_SIZE```.
 
-## Task Scheduling
+## Task Scheduling && SCHEDULER
 
 - In FREE-RTOS the Tasks run on the CPU when the scheduler allows them to.
 - The scheduler schedules the tasks to run on the CPU.
-- There are 
+- There are several types of scheduling policies such as :-
+> Pre-emptive :
+
+> Priority based pre-emptive :
+
+> Co-operative :
+
+## IDLE Task
+
+- IDLE task is a background task which has the lowest priority and runs on CPU when no other task is running. 
+- It works as a cleanup task which deallocates mem when a task is deleted.
+- It is created by ```scheduler```.
+
+## TIMER Services
+
+- It is also known as timer daemon task which deals with ```Software Timers```.
+- Used to manage FreeRTOS s/w timers.
+- All s/w timer callback functions execute in the cntext of the timer daemon task.
