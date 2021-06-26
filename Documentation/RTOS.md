@@ -21,7 +21,8 @@
 - A task handler has a infinite loop inside it which runs continously just like the infinte loop in main code.
 - In case the task implementation breaks the loop, the task must be deleted with APIs such as ```vTaskDelete(NULL)``` or else suffer chaos.
 - The Task stack space is used to store code status, variables etc, during context switch
-   
+- Once the Task is created it is put undet Ready list for the ```SCHEDULER``` to pick up when needed.
+
 ## RTOS Memory management scheme:
 
 - Things such as Tasks, Semaphore, Queues, Mutexes are called Kernel Objects since they are created by the Kernel during the execution of the program, i.e. runtime allocaiton of memory happens.
@@ -30,4 +31,8 @@
 - In Heap all the mem allocation for TCB and Task's stack is done.
 - The heap size can be configured using ```configTOTAL_HEAP_SIZE```.
 
-## 
+## Task Scheduling
+
+- In FREE-RTOS the Tasks run on the CPU when the scheduler allows them to.
+- The scheduler schedules the tasks to run on the CPU.
+- There are 
