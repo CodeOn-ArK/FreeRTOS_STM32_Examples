@@ -35,7 +35,7 @@
 ## Task Scheduling && SCHEDULER
 
 - In FREE-RTOS the Tasks run on the CPU when the scheduler allows them to.
-- The scheduler schedules the tasks to run on the CPU.
+- The scheduler schedules the tasks to run on the CPU. Its basic task is to determine which is the next potential task to run on the CPU.
 - There are several types of scheduling policies such as :-
 > Pre-emptive :
 
