@@ -38,10 +38,13 @@
 - The scheduler schedules the tasks to run on the CPU. Its basic task is to determine which is the next potential task to run on the CPU.
 - There are several types of scheduling policies such as :-
 > Pre-emptive :
+	The task(s) execute in a round robin manner
 
 > Priority based pre-emptive :
+	The task(s) execute in a prioritised way, i.e. tasks with higer priority get more time in CPU and vice versa.
 
 > Co-operative :
+	Task(s) work in tandem and yield CPU for next ```READY``` task after it has executed 
 
 ## IDLE Task
 
