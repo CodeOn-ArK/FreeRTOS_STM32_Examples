@@ -57,3 +57,13 @@
 - It is also known as timer daemon task which deals with ```Software Timers```.
 - Used to manage FreeRTOS s/w timers.
 - All s/w timer callback functions execute in the cntext of the timer daemon task.
+
+## FreeRTOS Kernel Interrupts
+
+- Below interrupts are used to schedule tasks in ARM Cortex based architecture
+[x] SVC Handler : It is used to launch the very first task
+[x] PendSV	: It is used for context switching purpose
+[x] SYSTICK 	: It is used for RTOS Tick management, to account for time elapsed in terms of system ticks
+
+- All these interrupts are configured at lowest possible priority value
+- 
