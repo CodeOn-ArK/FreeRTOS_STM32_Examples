@@ -31,6 +31,8 @@
 - In Heap all the mem allocation for TCB and Task's stack is done.
 - The TCB is created in heap and initialized
 - The heap size can be configured using ```configTOTAL_HEAP_SIZE```.
+- The Kernel also maintains its separate stack which it uses during ```SYSTICK``` or ```PendSV``` or any other interrupts
+- The Kernel Stack is maintained by ```MSP``` and the Task Stack AKA Process Stack is maintained by ```PSP```.
 
 ## Task Scheduling && SCHEDULER
 
@@ -66,4 +68,11 @@
 [x] SYSTICK 	: It is used for RTOS Tick management, to account for time elapsed in terms of system ticks
 
 - All these interrupts are configured at lowest possible priority value
+
+## Context Switching
+
+- It is the process of switching in of one task and switching out of another task. It is done by the scheduler.
+- Whether a switching will happen depends on the scheduling policy.
+- The PendSV Kernel Interrupt is used for this purpose.
+- During context switch, the ```Task State```, i.e. Processor core regs + Stack Contents, are saved.
 - 
