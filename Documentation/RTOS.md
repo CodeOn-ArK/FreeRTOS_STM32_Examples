@@ -76,4 +76,5 @@
 - The PendSV Kernel Interrupt is used for this purpose.
 - During context switch, the ```Task State```, i.e. Processor core regs + Stack Contents, are saved.
 > Tasks run in ```THREAD mode```  in ARM Cortex arch
+
 > ISRs run in ```HANDLER mode``` in ARM Cortex arch
