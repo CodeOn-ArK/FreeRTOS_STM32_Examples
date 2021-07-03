@@ -63,10 +63,11 @@ void printmsg(const char *format,...);
 uint8_t get_cmnd_code(uint8_t val);
 void get_args(uint8_t *buffer);
 void led_status(uint8_t var);
-void led_toggle(uint8_t var);
+void led_toggle(uint8_t var, uint32_t duration);
 void get_led_status(char *);
 void get_time(void);
 void exit_app(void);
+void led_toggle_start(TimerHandle_t xTimer );
 
 void printmsg(const char *format,...)
 {
@@ -87,6 +88,9 @@ static void Tmenu_print(void *parameter);
 static void Tcmnd_handling(void *parameter);
 static void Tcmnd_processing(void *parameter);
 static void Tuart_write(void *parameter);
+
+//Software timer handle
+xTimerHandle LED_Timer = NULL;
 
 /* USER CODE END PFP */
 
@@ -125,6 +129,8 @@ uint8_t cmnd_len = 0;
 #define RTC_PRINT_TIME		5
 #define EXIT_APP			6
 
+#define DELAY_TICKS pdMS_TO_TICKS(500)
+
 uint8_t menu[] =
 {"LED_ON\t\t\t-->\t0\n\r\
 LED_OFF\t\t\t-->\t1\n\r\
@@ -132,7 +138,8 @@ LED_TOGGLE\t\t-->\t2\n\r\
 LED_TOGGLE_OFF\t\t-->\t3\n\r\
 LED_READ_STATUS\t\t-->\t4\n\r\
 RTC_PRINT_TIME\t\t-->\t5\n\r\
-\033[0;41m\033[0;31mEXIT_APP\t\t-->\t6\033[0m\n\r\
+\033[0;31mEXIT_TASK\t\t-->\t6\033[0m\n\r\
+Clear_Screen\t\t-->\t7\n\r\
 Type options here  ===== "};
 
 int main(void)
@@ -225,7 +232,6 @@ static void Tmenu_print(void *parameter){
 }
 static void Tcmnd_handling(void *parameter){
 
-	uint8_t cmnd_code = 0;
 	app_cmnd_t *new_cmnd;
 
 	while(1){
@@ -234,8 +240,11 @@ static void Tcmnd_handling(void *parameter){
 
 		//send command to queue
 		new_cmnd = (app_cmnd_t *)pvPortMalloc(sizeof(app_cmnd_t));
+
+		taskENTER_CRITICAL();
 		new_cmnd->cmnd_num = get_cmnd_code(cmnd_buffer[0]);
 		//get_args(new_cmnd->cmnd_args);
+		taskEXIT_CRITICAL();
 
 		//send the command to command queue
 		xQueueSend(cmnd_queue, &new_cmnd, portMAX_DELAY);
@@ -256,10 +265,10 @@ static void Tcmnd_processing(void *parameter){
 			led_status(GPIO_PIN_RESET);
 
 		}else if(app_cmnd->cmnd_num == LED_TOGGLE_ON){
-			led_toggle(GPIO_PIN_SET);
+			led_toggle(GPIO_PIN_SET, DELAY_TICKS);
 
 		}else if(app_cmnd->cmnd_num == LED_TOGGLE_OFF){
-			led_toggle(GPIO_PIN_RESET);
+			led_toggle(GPIO_PIN_RESET, DELAY_TICKS);
 
 		}else if(app_cmnd->cmnd_num == LED_READ_STATUS){
 			get_led_status(pdata);
@@ -273,6 +282,9 @@ static void Tcmnd_processing(void *parameter){
 		}else{
 			printmsg("Err : Command Not Found");
 		}
+
+		//free the allocated memory
+		vPortFree(app_cmnd);
 	}
 }
 
@@ -331,11 +343,29 @@ void led_status(uint8_t var){
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, var);
 }
 
-void led_toggle(uint8_t var){
+void led_toggle_start(TimerHandle_t xTimer ){
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+}
+
+void led_toggle(uint8_t var, uint32_t duration){
 	if(var == GPIO_PIN_SET){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+		if(LED_Timer == NULL){
+			//create a software timer
+			LED_Timer = xTimerCreate("Toggle-Timer", duration, pdTRUE, NULL, led_toggle_start);
+
+			//start the timer
+			xTimerStart(LED_Timer, portMAX_DELAY);
+
+		}else{
+			//start the timer
+			xTimerStart(LED_Timer, portMAX_DELAY);
+
+		}
+
 	}else{
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+		//stop the timer
+		xTimerStop(LED_Timer, portMAX_DELAY);
+
 	}
 }
 
@@ -350,7 +380,16 @@ void get_time(void){
 }
 
 void exit_app(void){
+	vTaskDelete(Huart_write);
+	vTaskDelete(Hmenu_print);
+	vTaskDelete(Hcmnd_handling);
+	vTaskDelete(Hcmnd_processing);
 
+	HAL_NVIC_DisableIRQ(USART2_IRQn);
+}
+
+void vApplicationIdleHook( void ){
+	__WFI();
 }
  /******************************* SYS SETUP ************************************/
 /**
