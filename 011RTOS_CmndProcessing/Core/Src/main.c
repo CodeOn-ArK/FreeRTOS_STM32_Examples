@@ -62,6 +62,11 @@ void RTOS_delay(uint32_t delay_count);
 void printmsg(const char *format,...);
 uint8_t get_cmnd_code(uint8_t val);
 void get_args(uint8_t *buffer);
+void led_status(uint8_t var);
+void led_toggle(uint8_t var);
+void get_led_status(char *);
+void get_time(void);
+void exit_app(void);
 
 void printmsg(const char *format,...)
 {
@@ -112,14 +117,22 @@ typedef struct APP_CMND{
 uint8_t cmnd_buffer[20];
 uint8_t cmnd_len = 0;
 
+#define LED_ON				0
+#define LED_OFF				1
+#define LED_TOGGLE_ON		2
+#define LED_TOGGLE_OFF		3
+#define LED_READ_STATUS		4
+#define RTC_PRINT_TIME		5
+#define EXIT_APP			6
+
 uint8_t menu[] =
-{"LED_ON\t\t\t\t-->\t0\n\r\
-LED_OFF\t\t\t\t-->\t1\n\r\
+{"LED_ON\t\t\t-->\t0\n\r\
+LED_OFF\t\t\t-->\t1\n\r\
 LED_TOGGLE\t\t-->\t2\n\r\
 LED_TOGGLE_OFF\t\t-->\t3\n\r\
 LED_READ_STATUS\t\t-->\t4\n\r\
 RTC_PRINT_TIME\t\t-->\t5\n\r\
-EXIT_APP\t\t-->\t6\n\r\
+\033[0;41m\033[0;31mEXIT_APP\t\t-->\t6\033[0m\n\r\
 Type options here  ===== "};
 
 int main(void)
@@ -161,8 +174,9 @@ int main(void)
   cmnd_queue = xQueueCreate(10, sizeof(int *));
   uart_write_queue = xQueueCreate(10, sizeof(char *));
 
+  HAL_UART_Receive_IT(&huart2, cmnd_buffer, 2);
   if((cmnd_queue != NULL) && (uart_write_queue != NULL)){
-	status = xTaskCreate(Tmenu_print, "Menu Print", 1000, NULL, 2, &Hmenu_print);
+	status = xTaskCreate(Tmenu_print, "Menu Print", 1000, NULL, 1, &Hmenu_print);
 	configASSERT(status == pdPASS);
 	status = xTaskCreate(Tcmnd_handling, "Cmnd Handler", 1000, NULL, 2, &Hcmnd_handling);
 	configASSERT(status == pdPASS);
@@ -178,7 +192,6 @@ int main(void)
 	 printmsg("ERR : Queue creation unsuccessful!");
 
   }
-
 
 	//if the control comes here, the cpu comes here due to unsufficient task in the memory
 
@@ -216,7 +229,9 @@ static void Tcmnd_handling(void *parameter){
 	app_cmnd_t *new_cmnd;
 
 	while(1){
+		//Block the task upon entrance
 		xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
+
 		//send command to queue
 		new_cmnd = (app_cmnd_t *)pvPortMalloc(sizeof(app_cmnd_t));
 		new_cmnd->cmnd_num = get_cmnd_code(cmnd_buffer[0]);
@@ -228,8 +243,36 @@ static void Tcmnd_handling(void *parameter){
 }
 static void Tcmnd_processing(void *parameter){
 
-	while(1){
+	char pdata[50];
+	app_cmnd_t *app_cmnd;
 
+	while(1){
+		xQueueReceive(cmnd_queue, (void *)&app_cmnd, portMAX_DELAY);
+
+		if(app_cmnd->cmnd_num == LED_ON){
+			led_status(GPIO_PIN_SET);
+
+		}else if(app_cmnd->cmnd_num == LED_OFF){
+			led_status(GPIO_PIN_RESET);
+
+		}else if(app_cmnd->cmnd_num == LED_TOGGLE_ON){
+			led_toggle(GPIO_PIN_SET);
+
+		}else if(app_cmnd->cmnd_num == LED_TOGGLE_OFF){
+			led_toggle(GPIO_PIN_RESET);
+
+		}else if(app_cmnd->cmnd_num == LED_READ_STATUS){
+			get_led_status(pdata);
+
+		}else if(app_cmnd->cmnd_num == RTC_PRINT_TIME){
+			get_time();
+
+		}else if(app_cmnd->cmnd_num == EXIT_APP){
+			exit_app();
+
+		}else{
+			printmsg("Err : Command Not Found");
+		}
 	}
 }
 
@@ -262,6 +305,7 @@ void RTOS_delay(uint32_t delay_count)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *Huart){
 	BaseType_t pxHigherPriorityTaskWoken;
 
+	HAL_UART_Receive_IT(&huart2, cmnd_buffer, 2);
 	//Cmnd received over UART, notify the cmnd handler
 	xTaskNotifyFromISR(Hcmnd_handling, 0, eNoAction, &pxHigherPriorityTaskWoken);
 	//Notify the Menu handler to print the menu once again
@@ -280,6 +324,32 @@ uint8_t get_cmnd_code(uint8_t val){
 }
 
 void get_args(uint8_t *buffer){
+
+}
+
+void led_status(uint8_t var){
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, var);
+}
+
+void led_toggle(uint8_t var){
+	if(var == GPIO_PIN_SET){
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+	}else{
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+	}
+}
+
+void get_led_status(char *data){
+
+	sprintf(data,"The LED status is : %s",HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)? "ON" : "OFF" );
+	xQueueSend(uart_write_queue, &data, portMAX_DELAY);
+}
+
+void get_time(void){
+
+}
+
+void exit_app(void){
 
 }
  /******************************* SYS SETUP ************************************/
@@ -366,7 +436,7 @@ static void MX_USART2_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART2_Init 2 */
-  HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(USART2_IRQn, 8, 0);
   HAL_NVIC_EnableIRQ(USART2_IRQn);
 
   /* USER CODE END USART2_Init 2 */
@@ -383,25 +453,23 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD2_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin;
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 }
 
