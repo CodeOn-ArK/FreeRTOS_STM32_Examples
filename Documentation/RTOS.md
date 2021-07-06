@@ -78,4 +78,9 @@
 > Tasks run in ```THREAD mode```  in ARM Cortex arch
 
 > ISRs run in ```HANDLER mode``` in ARM Cortex arc
-h
+
+## Task Notification
+
+- Every RTOS task has a 32-bit notification value, which is initialised to 0 when task is created
+- An RTOS task notif event can unblock the receiving task and optionally manipulate the notification value like incrementing the value, setting bits etc
+- The Task can be suspended indefinitely when it wants a notification
