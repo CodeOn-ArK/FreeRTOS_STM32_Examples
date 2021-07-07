@@ -84,3 +84,14 @@
 - Every RTOS task has a 32-bit notification value, which is initialised to 0 when task is created
 - An RTOS task notif event can unblock the receiving task and optionally manipulate the notification value like incrementing the value, setting bits etc
 - The Task can be suspended indefinitely when it wants a notification
+
+## Priority 
+
+> Processor specific :
+- In ARM based microcontrollers, only 4-bits are used for assigning priority to interrupts. The silicon may choose to use less than 4-bits if it wants.
+
+> RTOS specific : 
+- We can assign priority to kernel interrupts like SVC, PendSV etc by configuring ```config_KERNEL_INTERRUPT_PRIORITY```, generally they are given lowest priority (0xF)
+- ```config_MAX_SYSCALL_PRIORITY``` is used a threshold limit for ISRs which use FreeRTOS APIs such as those ending with ```FromISR``` 
+- The priority of the ISR calling FreeRTOS APIs must be lower than that of the  ```config_MAX_SYSCALL_PRIORITY```
+- ISRs having higher priority than this cannot use FreeRTOS APIs
