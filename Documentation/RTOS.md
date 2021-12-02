@@ -4,12 +4,12 @@
 
 - In RTAs the response time is guaranted and predictable, failure to meet the time contraints can cause system failure
 - In non RTAs the reponse time increases with system load, unlike RTAs which guarantes constant response time
-- There could be small deviations in RTAs reponse time, in wuch case they are called soft-RTAs. Hard RTAs must complete within the time limit, failure to do so will result in absolute failure of the system
+- There could be small deviations in RTAs reponse time, in such case they are called soft-RTAs. Hard RTAs must complete within the time limit, failure to do so will result in absolute failure of the system
 - In short they are time deterministic applications
 
-## Task Scheduling : 
+## Task Scheduling :
 
-- In RTOS, thread executes in the order of priority. Higher Priority threads get more chance over lower priority counterparts. 
+- In RTOS, thread executes in the order of priority. Higher Priority threads get more chance over lower priority counterparts.
 - During thread execution if any higher priority thread becomes ready to run then it takes over the CPU and the lower priority thread gets paused.
 
 ## FREE-RTOS Task Creation :
@@ -21,12 +21,12 @@
 - A task handler has a infinite loop inside it which runs continously just like the infinte loop in main code.
 - In case the task implementation breaks the loop, the task must be deleted with APIs such as ```vTaskDelete(NULL)``` or else suffer chaos.
 - The Task stack space is used to store code status, variables etc, during context switch
-- Once the Task is created it is put undet Ready list for the ```SCHEDULER``` to pick up when needed.
+- Once the Task is created it is put under Ready list for the ```SCHEDULER``` to pick up when needed.
 
 ## RTOS Memory management scheme:
 
 - Things such as Tasks, Semaphore, Queues, Mutexes are called Kernel Objects since they are created by the Kernel during the execution of the program, i.e. runtime allocaiton of memory happens.
-- Since these are dynamically created they use up the heap memory. 
+- Since these are dynamically created they use up the heap memory.
 - The ```RAM``` is divided up in 2 parts; One is Heap region the other is used to store global data, arrays, static data etc.
 - In Heap all the mem allocation for TCB and Task's stack is done.
 - The TCB is created in heap and initialized
@@ -43,14 +43,14 @@
 	The task(s) execute in a round robin manner
 
 > Priority based pre-emptive :
-	The task(s) execute in a prioritised way, i.e. tasks with higer priority get more time in CPU and vice versa.
+	The task(s) execute in a prioritised way, i.e. tasks with higher priority get more time in CPU and vice versa.
 
 > Co-operative :
-	Task(s) work in tandem and yield CPU for next ```READY``` task after it has executed 
+	Task(s) work in tandem and yield CPU for next ```READY``` task after it has executed
 
 ## IDLE Task
 
-- IDLE task is a background task which has the lowest priority and runs on CPU when no other task is running. 
+- IDLE task is a background task which has the lowest priority and runs on CPU when no other task is running.
 - It works as a cleanup task which deallocates mem when a task is deleted.
 - It is created by ```scheduler```.
 
@@ -58,14 +58,14 @@
 
 - It is also known as timer daemon task which deals with ```Software Timers```.
 - Used to manage FreeRTOS s/w timers.
-- All s/w timer callback functions execute in the cntext of the timer daemon task.
+- All s/w timer callback functions execute in the context of the timer daemon task.
 
 ## FreeRTOS Kernel Interrupts
 
 - Below interrupts are used to schedule tasks in ARM Cortex based architecture
-[x] SVC Handler : It is used to launch the very first task
-[x] PendSV	: It is used for context switching purpose
-[x] SYSTICK 	: It is used for RTOS Tick management, to account for time elapsed in terms of system ticks
+	- [x] SVC Handler	: It is used to launch the very first task
+	- [x] PendSV		: It is used for context switching purpose
+	- [x] SYSTICK		: It is used for RTOS Tick management, to account for time elapsed in terms of system ticks
 
 - All these interrupts are configured at lowest possible priority value
 
@@ -85,13 +85,13 @@
 - An RTOS task notif event can unblock the receiving task and optionally manipulate the notification value like incrementing the value, setting bits etc
 - The Task can be suspended indefinitely when it wants a notification
 
-## Priority 
+## Priority
 
 > Processor specific :
 - In ARM based microcontrollers, only 4-bits are used for assigning priority to interrupts. The silicon may choose to use less than 4-bits if it wants.
 
-> RTOS specific : 
+> RTOS specific :
 - We can assign priority to kernel interrupts like SVC, PendSV etc by configuring ```config_KERNEL_INTERRUPT_PRIORITY```, generally they are given lowest priority (0xF)
-- ```config_MAX_SYSCALL_PRIORITY``` is used a threshold limit for ISRs which use FreeRTOS APIs such as those ending with ```FromISR``` 
+- ```config_MAX_SYSCALL_PRIORITY``` is used a threshold limit for ISRs which use FreeRTOS APIs such as those ending with ```FromISR```
 - The priority of the ISR calling FreeRTOS APIs must be lower than that of the  ```config_MAX_SYSCALL_PRIORITY```
 - ISRs having higher priority than this cannot use FreeRTOS APIs
